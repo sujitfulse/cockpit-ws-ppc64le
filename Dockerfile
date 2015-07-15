@@ -2,19 +2,8 @@ FROM jcajka/fedora22-ppc64le
 
 RUN dnf -y update && dnf install -y sed openssl && dnf clean all
 
-# A repo where we can find recent Cockpit builds for Fedora
-ADD cockpit-preview.repo /etc/yum.repos.d/
-
-# If there are rpm files in the current directory we'll install those,
-# otherwise use cockpit-preview repo. The Dockerfile is a hack around
-# Dockerfile lack of support for branches
-ADD cockpit-ws-*.rpm Dockerfile /tmp/
-
 # Again see above ... we do our branching in shell script
-RUN cd /tmp && \
-  ( ls *.rpm > /dev/null 2> /dev/null && dnf -y install *.rpm || \
-        dnf -y --enablerepo=cockpit-preview install cockpit-ws ) && \
-  dnf clean all && rm -f /tmp/*.rpm
+RUN dnf install -y cockpit-ws && dnf clean all 
 
 # And the stuff that starts the container
 RUN mkdir -p /container && ln -s /host/proc/1 /container/target-namespace
